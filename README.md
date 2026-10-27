@@ -3,7 +3,13 @@
 A **Vue 3** web app for collecting and sharing videos from the YoYo community. YoYo is a platform that makes yoga accessible to everyone, regardless of physical ability.
  
 Project built for the start2impact program.
- 
+
+ ## Run with Netlify
+
+If you want to try the web app : https://yoyo-yoga-app.netlify.app/
+
+
+
 ## Features
  
 - **"Friends" home page**: a list of the community's videos, loaded from an API with Axios.
