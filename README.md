@@ -1,70 +1,72 @@
 # YoYo - Friends
  
-Web app in **Vue 3** per raccogliere e condividere i video della community di YoYo, la piattaforma che rende lo yoga accessibile a tutti, indipendentemente dalle capacità fisiche.
+A **Vue 3** web app for collecting and sharing videos from the YoYo community. YoYo is a platform that makes yoga accessible to everyone, regardless of physical ability.
  
-Progetto realizzato per il percorso start2impact.
+Project built for the start2impact program.
  
-## Funzionalità
+## Features
  
-- **Home "Friends"**: elenco dei video della community, caricati da un'API tramite Axios.
-- **Scroll infinito**: i video compaiono 3 alla volta; quando si arriva in fondo alla lista ne vengono caricati altri 3, fino alla fine.
-- **Video page**: player YouTube incorporato, con titolo, autore, visualizzazioni e descrizione.
-- **Commenti**: sotto al video c'è un'area commenti. Il commento scritto nel form compare nell'elenco sopra al form. I commenti sono separati per video.
-- **Responsive**: progettata mobile-first, con la griglia delle card che si adatta anche agli schermi desktop.
-## Tecnologie
+- **"Friends" home page**: a list of the community's videos, loaded from an API with Axios.
+- **Infinite scroll**: videos appear 3 at a time; when the user reaches the bottom of the list, 3 more are loaded, until none are left.
+- **Video page**: an embedded YouTube player, with title, author, view count and description.
+- **Comments**: below the video there is a comments area. A comment written in the form appears in the list above it. Comments are kept separately for each video.
+- **Responsive**: designed mobile-first, with a card grid that also adapts to desktop screens.
+
+## Tech stack
  
-| Tecnologia | Uso |
+| Technology | Purpose |
 | --- | --- |
-| Vue 3 (`<script setup>`) | Framework dell'app |
-| Axios | Chiamata AJAX all'API dei video |
-| Bootstrap Vue Next | Componenti UI (card, bottoni) e layout |
-| vue3-youtube | Embed dei video YouTube |
-| IntersectionObserver (API del browser) | Rilevare la fine della lista per lo scroll infinito |
+| Vue 3 (`<script setup>`) | App framework |
+| Axios | AJAX request to the videos API |
+| Bootstrap Vue Next | UI components (cards, buttons) and layout |
+| vue3-youtube | YouTube video embed |
+| IntersectionObserver (browser API) | Detecting the end of the list for infinite scroll |
  
 ## API
  
-I dati arrivano dal file `videos.json` del repository [yoyo-friends-api](https://anita-liberatore.github.io/yoyo-friends-api/).
-Ogni video ha questi campi: `id`, `title`, `author`, `videoId`, `thumbnail`, `duration`, `views`, `description`.
+The data comes from the `videos.json` file in the [yoyo-friends-api](https://anita-liberatore.github.io/yoyo-friends-api/) repository.
+Each video has these fields: `id`, `title`, `author`, `videoId`, `thumbnail`, `duration`, `views`, `description`.
  
-L'API restituisce tutti i video in una volta sola, quindi la suddivisione "3 alla volta" è fatta lato client.
+The API returns all the videos at once, so the "3 at a time" split is done on the client side.
  
-## Struttura del progetto
+## Project structure
  
 ```
 src/
-├── App.vue                      # stato globale, header, scelta della schermata
+├── App.vue                      # global state, header, screen selection
 └── components/
-    ├── VideoList.vue            # card dei video + scroll infinito
-    ├── intersectionObserver.vue # sentinella: segnala quando è visibile
-    ├── VideoPage.vue            # player e dettagli del video
-    └── CommentSection.vue       # elenco commenti e form
+    ├── VideoList.vue            # video cards + infinite scroll
+    ├── intersectionObserver.vue # sentinel: signals when it becomes visible
+    ├── VideoPage.vue            # player and video details
+    └── CommentSection.vue       # comment list and form
 ```
  
-Sono 5 componenti in tutto, ciascuno ampiamente sotto le 400 righe.
+There are 5 components in total, each well under 400 lines.
  
-### Responsabilità dei componenti
+### Component responsibilities
  
-- **App.vue**: carica i dati con Axios, tiene lo stato (`videos`, `selectedVideo`, `comments`) e decide se mostrare la lista o la video page.
-- **VideoList.vue**: mostra le card dei video visibili e aumenta il loro numero quando la sentinella lo richiede.
-- **intersectionObserver.vue**: osserva un elemento vuoto in fondo alla lista ed emette un evento quando entra nello schermo. Non conosce i dati.
-- **VideoPage.vue**: mostra il player e le informazioni del video selezionato.
-- **CommentSection.vue**: mostra i commenti e gestisce il form di inserimento.
-### Flusso degli eventi
+- **App.vue**: loads the data with Axios, holds the state (`videos`, `selectedVideo`, `comments`) and decides whether to show the list or the video page.
+- **VideoList.vue**: displays the cards for the visible videos and increases their number when the sentinel asks for it.
+- **intersectionObserver.vue**: watches an empty element at the bottom of the list and emits an event when it enters the screen. It knows nothing about the data.
+- **VideoPage.vue**: displays the player and the information of the selected video.
+- **CommentSection.vue**: displays the comments and handles the input form.
+
+### Event flow
  
-I dati scendono dai componenti genitori ai figli tramite **props**, gli eventi salgono dai figli ai genitori tramite **emit**.
+Data flows down from parent to child components through **props**, while events flow up from children to parents through **emit**.
  
-| Evento | Emesso da | Ricevuto da | Effetto |
+| Event | Emitted by | Received by | Effect |
 | --- | --- | --- | --- |
-| `visible` | intersectionObserver | VideoList | mostra altri 3 video |
-| `select` | VideoList | App | imposta `selectedVideo` e apre la video page |
-| `back` | VideoPage | App | azzera `selectedVideo` e torna alla lista |
-| `submit` | CommentSection | VideoPage | inoltra il testo del commento |
-| `comment` | VideoPage | App | salva il commento per il video corrente |
+| `visible` | intersectionObserver | VideoList | shows 3 more videos |
+| `select` | VideoList | App | sets `selectedVideo` and opens the video page |
+| `back` | VideoPage | App | clears `selectedVideo` and returns to the list |
+| `submit` | CommentSection | VideoPage | forwards the comment text |
+| `comment` | VideoPage | App | saves the comment for the current video |
  
-## Scelte per mantenere il codice semplice
+## Choices to keep the code simple
  
-- Nessun router e nessuno store: con due sole schermate basta un `ref` (`selectedVideo`) per decidere cosa mostrare.
-- Tutto lo stato condiviso vive in `App.vue`, così c'è un solo posto in cui cercare i dati.
-- I componenti figli ricevono props ed emettono eventi, senza modificare direttamente lo stato dei genitori.
-- La lista visibile non è un secondo array da tenere aggiornato: è una `computed` che taglia l'array originale con `slice`.
-- L'embed YouTube è affidato a una libreria, invece di gestire a mano l'API del player.
+- No router and no store: with only two screens, a single `ref` (`selectedVideo`) is enough to decide what to show.
+- All shared state lives in `App.vue`, so there is only one place to look for the data.
+- Child components receive props and emit events, without directly modifying their parents' state.
+- The visible list is not a second array to keep in sync: it is a `computed` that slices the original array with `slice`.
+- The YouTube embed is handled by a library, instead of managing the player API by hand.
